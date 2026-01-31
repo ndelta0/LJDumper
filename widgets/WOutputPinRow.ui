@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>WOutputPinRow</class>
+    <widget class="QWidget" name="WOutputPinRow">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>850</width>
+                <height>64</height>
+            </rect>
+        </property>
+        <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+            </sizepolicy>
+        </property>
+        <property name="windowTitle">
+            <string>WOutputPinRow</string>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+                <widget class="QLabel" name="lblPinInfo">
+                    <property name="text">
+                        <string>MIO69 (69)</string>
+                    </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QComboBox" name="cbPinFunction">
+                    <item>
+                        <property name="text">
+                            <string>Cyfrowe</string>
+                        </property>
+                    </item>
+                    <item>
+                        <property name="text">
+                            <string>PWM</string>
+                        </property>
+                    </item>
+                    <item>
+                        <property name="text">
+                            <string>Impulsowe</string>
+                        </property>
+                    </item>
+                </widget>
+            </item>
+            <item>
+                <widget class="QStackedWidget" name="swFunctionControl">
+                    <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="currentIndex">
+                        <number>0</number>
+                    </property>
+                    <widget class="QWidget" name="pDigital">
+                        <property name="autoFillBackground">
+                            <bool>false</bool>
+                        </property>
+                        <layout class="QHBoxLayout" name="horizontalLayout_2">
+                            <item>
+                                <widget class="QCheckBox" name="cbDigitalOutput">
+                                    <property name="text">
+                                        <string>Wyjście</string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item>
+                                <spacer name="horizontalSpacer_2">
+                                    <property name="orientation">
+                                        <enum>Qt::Orientation::Horizontal</enum>
+                                    </property>
+                                    <property name="sizeHint" stdset="0">
+                                        <size>
+                                            <width>40</width>
+                                            <height>20</height>
+                                        </size>
+                                    </property>
+                                </spacer>
+                            </item>
+                        </layout>
+                    </widget>
+                    <widget class="QWidget" name="pPwmOut">
+                        <layout class="QHBoxLayout" name="horizontalLayout_3">
+                            <item>
+                                <widget class="QCheckBox" name="cbPwmEnable">
+                                    <property name="text">
+                                        <string>Włącz</string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLabel" name="lblPwmClock">
+                                    <property name="text">
+                                        <string>Żródło</string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QComboBox" name="cbPwmClock">
+                                    <item>
+                                        <property name="text">
+                                            <string>Zegar 1</string>
+                                        </property>
+                                    </item>
+                                    <item>
+                                        <property name="text">
+                                            <string>Zegar 2</string>
+                                        </property>
+                                    </item>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLabel" name="lblPwmDuty">
+                                    <property name="text">
+                                        <string>Wypełnienie</string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QSpinBox" name="sbPwmDuty">
+                                    <property name="suffix">
+                                        <string>%</string>
+                                    </property>
+                                    <property name="maximum">
+                                        <number>100</number>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item>
+                                <spacer name="horizontalSpacer_4">
+                                    <property name="orientation">
+                                        <enum>Qt::Orientation::Horizontal</enum>
+                                    </property>
+                                    <property name="sizeHint" stdset="0">
+                                        <size>
+                                            <width>40</width>
+                                            <height>20</height>
+                                        </size>
+                                    </property>
+                                </spacer>
+                            </item>
+                        </layout>
+                    </widget>
+                    <widget class="QWidget" name="pPulseOut">
+                        <layout class="QHBoxLayout" name="horizontalLayout_4">
+                            <item>
+                                <widget class="QLabel" name="lblPulseClock">
+                                    <property name="text">
+                                        <string>Źródło</string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QComboBox" name="cbPulseClock">
+                                    <item>
+                                        <property name="text">
+                                            <string>Zegar 1</string>
+                                        </property>
+                                    </item>
+                                    <item>
+                                        <property name="text">
+                                            <string>Zegar 2</string>
+                                        </property>
+                                    </item>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLabel" name="lblPulseLength">
+                                    <property name="text">
+                                        <string>Długość impulsu</string>
+                                    </property>
+                                    <property name="wordWrap">
+                                        <bool>true</bool>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLabel" name="lblPulseCount">
+                                    <property name="text">
+                                        <string>Ilość impulsów</string>
+                                    </property>
+                                    <property name="wordWrap">
+                                        <bool>true</bool>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QSpinBox" name="sbPulseCount">
+                                    <property name="minimum">
+                                        <number>1</number>
+                                    </property>
+                                    <property name="maximum">
+                                        <number>2147483647</number>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QPushButton" name="btnPulseStart">
+                                    <property name="text">
+                                        <string>Wykonaj</string>
+                                    </property>
+                                </widget>
+                            </item>
+                        </layout>
+                    </widget>
+                </widget>
+            </item>
+        </layout>
+    </widget>
+    <resources/>
+    <connections>
+        <connection>
+            <sender>cbPinFunction</sender>
+            <signal>activated(int)</signal>
+            <receiver>swFunctionControl</receiver>
+            <slot>setCurrentIndex(int)</slot>
+            <hints>
+                <hint type="sourcelabel">
+                    <x>123</x>
+                    <y>31</y>
+                </hint>
+                <hint type="destinationlabel">
+                    <x>347</x>
+                    <y>31</y>
+                </hint>
+            </hints>
+        </connection>
+    </connections>
+</ui>

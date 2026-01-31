@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>FileNameTemplatingDialog</class>
+    <widget class="QDialog" name="FileNameTemplatingDialog">
+        <property name="windowModality">
+            <enum>Qt::WindowModality::NonModal</enum>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>400</width>
+                <height>220</height>
+            </rect>
+        </property>
+        <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+            </sizepolicy>
+        </property>
+        <property name="windowTitle">
+            <string>Szablon nazwy pliku</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+            <property name="sizeConstraint">
+                <enum>QLayout::SizeConstraint::SetFixedSize</enum>
+            </property>
+            <item>
+                <widget class="QLabel" name="labelDescription">
+                    <property name="text">
+                        <string>Do nazwy pliku można wpisać specjalne sekwencje, które zostaną zamienione na podane
+                            wartości przy rozpoczęciu zapisu:
+                        </string>
+                    </property>
+                    <property name="wordWrap">
+                        <bool>true</bool>
+                    </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLabel" name="labelGuide">
+                    <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="text">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;%Y – rok (np. 2026)&lt;br/&gt;%M – miesiąc
+                            (np. 01)&lt;br/&gt;%D – dzień (np. 01)&lt;br/&gt;%h – godzina (np. 12)&lt;br/&gt;%m – minuta
+                            (np. 30)&lt;br/&gt;%s – sekunda (np. 30)&lt;br/&gt;%i – numer kolejny (od 0 licząc od
+                            uruchomienia programu)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+                        </string>
+                    </property>
+                    <property name="alignment">
+                        <set>
+                            Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter
+                        </set>
+                    </property>
+                    <property name="wordWrap">
+                        <bool>true</bool>
+                    </property>
+                </widget>
+            </item>
+        </layout>
+    </widget>
+    <resources/>
+    <connections/>
+</ui>

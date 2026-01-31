@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>ScanRateDialog</class>
+    <widget class="QDialog" name="ScanRateDialog">
+        <property name="windowModality">
+            <enum>Qt::WindowModality::NonModal</enum>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>400</width>
+                <height>220</height>
+            </rect>
+        </property>
+        <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+            </sizepolicy>
+        </property>
+        <property name="windowTitle">
+            <string>Częstotliwość próbkowania</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+            <property name="sizeConstraint">
+                <enum>QLayout::SizeConstraint::SetFixedSize</enum>
+            </property>
+            <item>
+                <widget class="QLabel" name="labelDescription">
+                    <property name="text">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Częstotliwość w Hz, z którą dane będą
+                            pobierane z karty pomiarowej.&lt;/p&gt;&lt;p&gt;Zakres częstotliwości wynosi od 1 Hz do 10
+                            kHz.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+                        </string>
+                    </property>
+                    <property name="alignment">
+                        <set>Qt::AlignmentFlag::AlignCenter</set>
+                    </property>
+                    <property name="wordWrap">
+                        <bool>true</bool>
+                    </property>
+                </widget>
+            </item>
+        </layout>
+    </widget>
+    <resources/>
+    <connections/>
+</ui>
