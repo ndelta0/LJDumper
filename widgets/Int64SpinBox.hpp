@@ -11,26 +11,6 @@ public:
     using ValueType = qint64;
     static const int valueTypeMetaId;
 
-private:
-    Q_PROPERTY(QString cleanText READ cleanText)
-
-    Q_PROPERTY(QString displayedText READ displayedText)
-
-    Q_PROPERTY(qint32 displayIntegerBase READ displayIntegerBase WRITE setDisplayIntegerBase)
-
-    Q_PROPERTY(ValueType maximum READ maximum)
-
-    Q_PROPERTY(ValueType minimum READ minimum)
-
-    Q_PROPERTY(QString prefix READ prefix WRITE setPrefix)
-
-    Q_PROPERTY(QString suffix READ suffix WRITE setSuffix)
-
-    Q_PROPERTY(qint32 singleStep READ singleStep WRITE setSingleStep)
-
-    Q_PROPERTY(ValueType value READ value WRITE setValue NOTIFY valueChanged USERtrue)
-
-public:
     explicit Int64SpinBox(QWidget *parent = nullptr);
 
     Int64SpinBox(const Int64SpinBox &) = delete;
@@ -193,5 +173,3 @@ private:
     ValueType m_maximum;
     ValueType m_value = 0;
 };
-
-Q_DECLARE_METATYPE(Int64SpinBox::ValueType);

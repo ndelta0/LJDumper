@@ -1,56 +1,101 @@
 # FindLabJackM.cmake
 #
-# Finds the LabJackM (LJM) library
-#
 # Provides:
 #   LabJackM_FOUND
 #   LabJackM_VERSION
 #   LabJackM_INCLUDE_DIRS
 #   LabJackM_LIBRARIES
-#   LabJackM::LabJackM (imported target)
-#
-# Expected layout (default /usr/local):
-#   include/LabJackM.h
-#   include/LJM_StreamUtilities.h
-#   include/LJM_Utilities.h
-#   lib/libLabJackM.so
-#   share/LabJack/ljm.version
+#   LabJackM::LabJackM
 
 include(FindPackageHandleStandardArgs)
 
-# --- Headers ---
-find_path(LabJackM_INCLUDE_DIR
-        NAMES
-        LabJackM.h
-        LJM_StreamUtilities.h
-        LJM_Utilities.h
-        PATHS
-        /usr/local/include
-        /usr/include
-)
+# ------------------------------------------------------------
+# Platform-specific roots
+# ------------------------------------------------------------
+if (WIN32)
+    set(_LJM_ROOTS
+            "$ENV{ProgramFiles\(x86\)}/LabJack/Drivers"
+            "$ENV{ProgramFiles}/LabJack/Drivers"
+    )
+else()
+    set(_LJM_ROOTS
+            /usr/local
+            /usr
+    )
+endif()
 
-# --- Library ---
-find_library(LabJackM_LIBRARY
-        NAMES LabJackM
-        PATHS
-        /usr/local/lib
-        /usr/lib
-)
+# ------------------------------------------------------------
+# Headers
+# ------------------------------------------------------------
+if (WIN32)
+    find_path(LabJackM_INCLUDE_DIR
+            NAMES LabJackM.h
+            PATHS ${_LJM_ROOTS}
+            NO_DEFAULT_PATH
+    )
+else()
+    find_path(LabJackM_INCLUDE_DIR
+            NAMES
+            LabJackM.h
+            PATHS ${_LJM_ROOTS}
+            PATH_SUFFIXES include
+    )
+endif()
 
-# --- Version ---
-find_file(LabJackM_VERSION_FILE
-        NAMES ljm.version
-        PATHS
-        /usr/local/share/LabJack
-        /usr/share/LabJack
-)
+# ------------------------------------------------------------
+# Library
+# ------------------------------------------------------------
+if (WIN32)
+    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+        # 64-bit
+        find_library(LabJackM_LIBRARY
+                NAMES LabJackM
+                PATHS ${_LJM_ROOTS}
+                PATH_SUFFIXES 64bit
+                NO_DEFAULT_PATH
+        )
+    else()
+        # 32-bit
+        find_library(LabJackM_LIBRARY
+                NAMES LabJackM
+                PATHS ${_LJM_ROOTS}
+                NO_DEFAULT_PATH
+        )
+    endif()
 
-if (LabJackM_VERSION_FILE)
-    file(READ "${LabJackM_VERSION_FILE}" _LJM_VERSION_CONTENT)
-    string(STRIP "${_LJM_VERSION_CONTENT}" LabJackM_VERSION)
-endif ()
+    # DLL location (for runtime)
+    find_file(LabJackM_DLL
+            NAMES LabJack.LJM.dll
+            PATHS ${_LJM_ROOTS}
+            NO_DEFAULT_PATH
+    )
+else()
+    find_library(LabJackM_LIBRARY
+            NAMES LabJackM
+            PATHS ${_LJM_ROOTS}
+            PATH_SUFFIXES lib
+    )
+endif()
 
-# --- Standard handling ---
+# ------------------------------------------------------------
+# Version (Linux only – Windows drivers don’t ship one cleanly)
+# ------------------------------------------------------------
+if (NOT WIN32)
+    find_file(LabJackM_VERSION_FILE
+            NAMES ljm.version
+            PATHS ${_LJM_ROOTS}
+            PATH_SUFFIXES share/LabJack
+    )
+
+    if (LabJackM_VERSION_FILE)
+        file(READ "${LabJackM_VERSION_FILE}" _LJM_VERSION_CONTENT)
+        string(STRIP "${_LJM_VERSION_CONTENT}" LabJackM_VERSION)
+    endif()
+endif()
+
+# ------------------------------------------------------------
+# Package handling
+# ------------------------------------------------------------
 find_package_handle_standard_args(LabJackM
         REQUIRED_VARS
         LabJackM_LIBRARY
@@ -59,21 +104,32 @@ find_package_handle_standard_args(LabJackM
         LabJackM_VERSION
 )
 
-if (LabJackM_FOUND)
-    set(LabJackM_LIBRARIES ${LabJackM_LIBRARY})
-    set(LabJackM_INCLUDE_DIRS ${LabJackM_INCLUDE_DIR})
-
-    if (NOT TARGET LabJackM::LabJackM)
+# ------------------------------------------------------------
+# Imported target
+# ------------------------------------------------------------
+if (LabJackM_FOUND AND NOT TARGET LabJackM::LabJackM)
+    if (WIN32)
+        add_library(LabJackM::LabJackM SHARED IMPORTED)
+        set_target_properties(LabJackM::LabJackM PROPERTIES
+                IMPORTED_IMPLIB "${LabJackM_LIBRARY}"
+                IMPORTED_LOCATION "${LabJackM_DLL}"
+                INTERFACE_INCLUDE_DIRECTORIES "${LabJackM_INCLUDE_DIR}"
+        )
+    else()
         add_library(LabJackM::LabJackM SHARED IMPORTED)
         set_target_properties(LabJackM::LabJackM PROPERTIES
                 IMPORTED_LOCATION "${LabJackM_LIBRARY}"
                 INTERFACE_INCLUDE_DIRECTORIES "${LabJackM_INCLUDE_DIR}"
         )
-    endif ()
-endif ()
+    endif()
+endif()
+
+set(LabJackM_LIBRARIES ${LabJackM_LIBRARY})
+set(LabJackM_INCLUDE_DIRS ${LabJackM_INCLUDE_DIR})
 
 mark_as_advanced(
-        LabJackM_INCLUDE_DIR
         LabJackM_LIBRARY
+        LabJackM_INCLUDE_DIR
         LabJackM_VERSION_FILE
+        LabJackM_DLL
 )
