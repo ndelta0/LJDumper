@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QMainWindow>
 
+#include "widgets/DAnalogPinConfig.hpp"
 #include "widgets/DFlowLayout.hpp"
 #include "widgets/DPinConfig.hpp"
 
@@ -37,7 +38,10 @@ public:
 
     ~LjdMainWindow() override;
 
-private slots:
+private
+    slots:
+    
+
     void btnConnection_clicked();
 
     void btnStartStop_clicked();
@@ -56,6 +60,7 @@ private:
 
     DFlowLayout *m_inputConfigLayout;
 
+    QVector<DAnalogPinConfig *> m_analogPinConfigs;
     QVector<DPinConfig *> m_pinConfigs;
 
     CallbackInfo m_callbackInfo;

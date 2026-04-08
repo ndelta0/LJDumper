@@ -39,7 +39,7 @@ DPinConfig::Info DPinConfig::info() const {
 
 void DPinConfig::setInfo(const Info &info) {
     m_info = info;
-    ui->cbEnabled->setChecked(m_info.enabled);
+    ui->cbEnabled->setCheckState(m_info.enabled ? Qt::Checked : Qt::Unchecked);
     ui->editLogColumn->setText(m_info.dataName);
     ui->editLogColumn->setEnabled(m_info.enabled);
 }

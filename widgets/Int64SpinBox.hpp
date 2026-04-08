@@ -28,7 +28,7 @@ private:
 
     Q_PROPERTY(qint32 singleStep READ singleStep WRITE setSingleStep)
 
-    Q_PROPERTY(ValueType value READ value WRITE setValue NOTIFY valueChanged USERtrue)
+    //    Q_PROPERTY(ValueType value READ value WRITE setValue NOTIFY valueChanged USERtrue)
 
 public:
     explicit Int64SpinBox(QWidget *parent = nullptr);
@@ -131,6 +131,8 @@ public
     first signal contains the numeric value and the second signal the full text as returned by
     ``displayedText()``.
     */ ///@{
+
+
     
 
     void valueChanged(ValueType new_value);

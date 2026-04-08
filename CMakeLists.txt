@@ -29,6 +29,9 @@ add_executable(LJDumper main.cpp
         widgets/DPinConfig.cpp
         widgets/DPinConfig.hpp
         widgets/DPinConfig.ui
+        widgets/DAnalogPinConfig.cpp
+        widgets/DAnalogPinConfig.hpp
+        widgets/DAnalogPinConfig.ui
         widgets/DFlowLayout.cpp
         widgets/DFlowLayout.hpp
         fileNameTemplateValidator.cpp

@@ -62,10 +62,22 @@ LjdMainWindow::LjdMainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::
     ui->boxConfigInput->setLayout(l);
 
     // AIN 0-13
+    DAnalogPinConfig *previous = nullptr;
     for (auto i = 0; i <= 13; ++i) {
-        auto *pin = new DPinConfig(QString("AIN%1").arg(i), i + 3);
-        m_pinConfigs.push_back(pin);
+        auto *pin = new DAnalogPinConfig(QString("AIN%1").arg(i), i + 3);
+        m_analogPinConfigs.push_back(pin);
         l->addWidget(pin);
+
+        if (i % 2 == 0) {
+            // Even-numbered channels can have differential input enabled
+            previous = pin;
+        } else {
+            // Odd-numbered channels are the reference for previous channel
+            pin->setDifferentialVisible(false);
+            if (previous) {
+                previous->setDifferentialPin(pin);
+            }
+        }
     }
     // FIO 0-7
     for (auto i = 0; i <= 7; ++i) {
@@ -314,6 +326,47 @@ void LjdMainWindow::btnStartStop_clicked() {
             std::cerr << "Warning: Failed to read DIO direction: " << err_str.toStdString() << '\n';
         } else {
             io_dir_bitmap = static_cast<uint64_t>(tmp);
+        }
+        bool previous_was_differential = false;
+        for (const auto &pin: m_analogPinConfigs) {
+            const auto [enabled, hwName, dataName, differential, canDifferential] = pin->info();
+            if (!enabled) {
+                continue;
+            }
+
+            // Enable/disable differential
+            if (canDifferential) {
+                previous_was_differential = differential;
+                if (differential) {
+                    int this_channel = hwName.mid(3).toInt();
+                    m_ljm->writeNameSync(QString("%1_NEGATIVE_CH").arg(hwName), this_channel + 1);
+                } else {
+                    m_ljm->writeNameSync(QString("%1_NEGATIVE_CH").arg(hwName), 199);
+                }
+            }
+
+            if (!canDifferential && previous_was_differential) {
+                continue; // Previous is differential, cannot read
+            }
+
+            const auto col_name = dataName.isEmpty() ? hwName : dataName;
+            file->write((",\"" + col_name + "\"").toUtf8());
+
+
+            int addr, type;
+            if (const auto err = LJM_NameToAddress(hwName.toUtf8().constData(), &addr, &type)) {
+                const auto err_str = lj::ErrorToString(err);
+                std::cerr << "Error: Could not resolve pin name '" << hwName.toStdString() << "': " << err_str.
+                        toStdString() << '\n';
+                QMessageBox::critical(this, "Błąd",
+                                      QString("Nie udało się znaleźć wejścia %1\n(Err: %2)").arg(hwName).arg(err_str));
+                ui->btnStartStop->setEnabled(false);
+                m_callbackInfo.outputFile->close();
+                delete m_callbackInfo.outputFile;
+                return;
+            }
+            columns.push_back(type);
+            column_registers.push_back(addr);
         }
         for (const auto &pin: m_pinConfigs) {
             const auto [enabled, hwName, dataName] = pin->info();
