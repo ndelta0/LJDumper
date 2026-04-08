@@ -12,6 +12,7 @@
 #include <QCloseEvent>
 #include <QStandardPaths>
 #include <QFileDialog>
+#include <QString>
 
 #include "fileNameTemplateValidator.hpp"
 #include "FileNameTemplatingDialog.hpp"
@@ -108,6 +109,9 @@ LjdMainWindow::LjdMainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::
 
 LjdMainWindow::~LjdMainWindow() {
     if (m_isConnected) {
+        if (m_isScanning) {
+            btnStartStop_clicked();
+        }
         m_ljm->closeDeviceSync();
     }
 
@@ -150,8 +154,7 @@ void LjdMainWindow::btnConnection_clicked() {
     std::cerr << "Connecting...\n";
     ui->dispStatus->setText("<span style=\"color:yellow;\">Łączenie...</span>");
 
-    // TODO: Change back identifier to "ANY" or card's serial number
-    m_ljm->openDevice(LJM_dtT7, LJM_ctANY, "192.168.0.169", [this](int /*handle*/, const int err) {
+    m_ljm->openDevice(LJM_dtT7, LJM_ctANY, "ANY", [this](int /*handle*/, const int err) {
         ui->btnConnection->setEnabled(true);
 
         if (err) {
@@ -392,21 +395,25 @@ void LjdMainWindow::btnStartStop_clicked() {
             columns.push_back(type);
             column_registers.push_back(addr);
 
-            // Make sure the pin is set as input
-            const auto dio_number = lj::PinHwNameToDioNumber(pin->info().hwName);
-            if (dio_number == -1) {
-                std::cerr << "Warning: Got DIO number " << dio_number << " for pin " << pin->info().hwName.toStdString()
-                        << "\n";
-                continue;
-            }
-            // Set bit n to 0, n=dio_number
-            io_dir_bitmap &= ~(1ULL << dio_number);
-            const auto dio_reg_name = QString("DIO%1_EF_ENABLE").arg(dio_number);
-            if (const auto err = m_ljm->writeNameSync(dio_reg_name, 0)) {
-                const auto err_str = lj::ErrorToString(err);
-                std::cerr << "Warning: Failed to disable EF functionality for pin '" << hwName.toStdString() << "': " <<
-                        err_str.
-                        toStdString() << '\n';
+            if (!pin->info().hwName.startsWith("AIN")) {
+                // Make sure the pin is set as input
+                const auto dio_number = lj::PinHwNameToDioNumber(pin->info().hwName);
+                if (dio_number == -1) {
+                    std::cerr << "Warning: Got DIO number " << dio_number << " for pin " << pin->info().hwName.
+                            toStdString()
+                            << "\n";
+                    continue;
+                }
+                // Set bit n to 0, n=dio_number
+                io_dir_bitmap &= ~(1ULL << dio_number);
+                const auto dio_reg_name = QString("DIO%1_EF_ENABLE").arg(dio_number);
+                if (const auto err = m_ljm->writeNameSync(dio_reg_name, 0)) {
+                    const auto err_str = lj::ErrorToString(err);
+                    std::cerr << "Warning: Failed to disable EF functionality for pin '" << hwName.toStdString() <<
+                            "': " <<
+                            err_str.
+                            toStdString() << '\n';
+                }
             }
         }
         m_ljm->writeNameSync("DIO_DIRECTION", io_dir_bitmap);
@@ -441,61 +448,63 @@ void LjdMainWindow::btnStartStop_clicked() {
         ui->boxConfigInput->setEnabled(false);
         ui->boxConfigLogging->setEnabled(false);
 
+        auto stream_start_cb = [this](const double scanRate, int err) {
+            if (scanRate != m_callbackInfo.scanRate) {
+                m_callbackInfo.scanRate = scanRate;
+                m_callbackInfo.timeResolution = 1 / scanRate;
+                m_callbackInfo.timePrecision = static_cast<int>(std::ceil(
+                    std::log10(m_callbackInfo.scanRate)));
+            }
+
+            if (err) {
+                const auto err_str = lj::ErrorToString(err);
+                std::cerr << "Error: Failed to start stream: " << err_str.toStdString() << '\n';
+                QMessageBox::critical(this, "Błąd",
+                                      QString("Nie udało się rozpocząć pobierania danych\n(Err: %1)")
+                                      .arg(err_str));
+                m_callbackInfo.outputFile->close();
+                delete m_callbackInfo.outputFile;
+
+                ui->btnStartStop->setEnabled(true);
+                ui->btnConnection->setEnabled(true);
+                ui->boxConfigInput->setEnabled(true);
+                ui->boxConfigLogging->setEnabled(true);
+                return;
+            }
+
+            // Enable button
+            ui->btnStartStop->setEnabled(true);
+            ui->btnStartStop->setText("Zatrzymaj zapis");
+            ui->sbSampleRate->setValue(static_cast<int>(scanRate));
+            ui->dispStatus->setText("<span style=\"color:cyan;\">Akwizycja...</span>");
+
+            // Enable callback
+            m_isScanning = true;
+
+            err = LJM_SetStreamCallback(m_ljm->ljHandle(), [](void *user_data) {
+                static_cast<LjdMainWindow *>(user_data)->streamReadCallback();
+            }, this);
+            if (err) {
+                const auto err_str = lj::ErrorToString(err);
+                std::cerr << "Error: Failed to bind callback: " << err_str.toStdString() << '\n';
+                QMessageBox::critical(this, "Błąd",
+                                      QString("Nie udało się rozpocząć pobierania danych\n(Err: %1)")
+                                      .arg(err_str));
+                m_callbackInfo.outputFile->close();
+                delete m_callbackInfo.outputFile;
+
+                ui->btnStartStop->setEnabled(true);
+                ui->btnConnection->setEnabled(true);
+                ui->boxConfigInput->setEnabled(true);
+                ui->boxConfigLogging->setEnabled(true);
+
+                m_ljm->streamStopSync();
+            }
+        };
+
+        m_ljm->streamStopSync(); // Returns err=0 both when already streaming and when not streaming, failsafe to force stop streaming when card in unknown state
         m_ljm->streamStart(m_callbackInfo.scansPerRead, column_registers,
-                           m_callbackInfo.scanRate,
-                           [this](const double scanRate, int err) {
-                               if (scanRate != m_callbackInfo.scanRate) {
-                                   m_callbackInfo.scanRate = scanRate;
-                                   m_callbackInfo.timeResolution = 1 / scanRate;
-                                   m_callbackInfo.timePrecision = static_cast<int>(std::ceil(
-                                       std::log10(m_callbackInfo.scanRate)));
-                               }
-
-                               if (err) {
-                                   const auto err_str = lj::ErrorToString(err);
-                                   std::cerr << "Error: Failed to start stream: " << err_str.toStdString() << '\n';
-                                   QMessageBox::critical(this, "Błąd",
-                                                         QString("Nie udało się rozpocząć pobierania danych\n(Err: %1)")
-                                                         .arg(err_str));
-                                   m_callbackInfo.outputFile->close();
-                                   delete m_callbackInfo.outputFile;
-
-                                   ui->btnStartStop->setEnabled(true);
-                                   ui->btnConnection->setEnabled(true);
-                                   ui->boxConfigInput->setEnabled(true);
-                                   ui->boxConfigLogging->setEnabled(true);
-                                   return;
-                               }
-
-                               // Enable button
-                               ui->btnStartStop->setEnabled(true);
-                               ui->btnStartStop->setText("Zatrzymaj zapis");
-                               ui->sbSampleRate->setValue(static_cast<int>(scanRate));
-                               ui->dispStatus->setText("<span style=\"color:cyan;\">Akwizycja...</span>");
-
-                               // Enable callback
-                               m_isScanning = true;
-
-                               err = LJM_SetStreamCallback(m_ljm->ljHandle(), [](void *user_data) {
-                                   static_cast<LjdMainWindow *>(user_data)->streamReadCallback();
-                               }, this);
-                               if (err) {
-                                   const auto err_str = lj::ErrorToString(err);
-                                   std::cerr << "Error: Failed to bind callback: " << err_str.toStdString() << '\n';
-                                   QMessageBox::critical(this, "Błąd",
-                                                         QString("Nie udało się rozpocząć pobierania danych\n(Err: %1)")
-                                                         .arg(err_str));
-                                   m_callbackInfo.outputFile->close();
-                                   delete m_callbackInfo.outputFile;
-
-                                   ui->btnStartStop->setEnabled(true);
-                                   ui->btnConnection->setEnabled(true);
-                                   ui->boxConfigInput->setEnabled(true);
-                                   ui->boxConfigLogging->setEnabled(true);
-
-                                   m_ljm->streamStopSync();
-                               }
-                           });
+                           m_callbackInfo.scanRate, stream_start_cb);
     }
 }
 
@@ -510,12 +519,12 @@ void LjdMainWindow::closeEvent(QCloseEvent *event) {
     if (m_isConnected) {
         // Confirm whether the window should be closed.
         if (QMessageBox::warning(this, "Zamknięcie programu",
-                                 "Program jest połączony z urządzeniem.\nCzy na pewno rozłączyć i zamknąć program?",
+                                 "Program jest połączony z urządzeniem.\nCzy na pewno rozłączyć i zamknąć program?\nMoże wystąpić utrata danych!",
                                  QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes) {
             event->ignore();
-        } else {
-            event->accept();
+            return;
         }
+        event->accept();
     }
 #endif
 

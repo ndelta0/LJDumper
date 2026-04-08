@@ -131,8 +131,6 @@ public
     first signal contains the numeric value and the second signal the full text as returned by
     ``displayedText()``.
     */ ///@{
-
-
     
 
     void valueChanged(ValueType new_value);
@@ -195,5 +193,3 @@ private:
     ValueType m_maximum;
     ValueType m_value = 0;
 };
-
-Q_DECLARE_METATYPE(Int64SpinBox::ValueType);
