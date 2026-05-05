@@ -14,7 +14,7 @@
 #include <QFileDialog>
 #include <QString>
 
-#include "fileNameTemplateValidator.hpp"
+#include "../fileNameTemplateValidator.hpp"
 #include "FileNameTemplatingDialog.hpp"
 #include "ScanRateDialog.hpp"
 

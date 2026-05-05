@@ -14,47 +14,48 @@ set(CMAKE_AUTOUIC ON)
 find_package(Qt6 COMPONENTS
         Core
         Gui
-        Widgets
+        widgets
         REQUIRED)
 
 find_package(LabJackM REQUIRED)
 
-add_executable(LJDumper main.cpp
-        lj/ljManager.cpp
-        lj/ljManager.hpp
-        views/LjdMainWindow.cpp
-        views/LjdMainWindow.hpp
-        views/LjdMainWindow.ui
-        lj/utils.cpp
-        lj/utils.hpp
-        widgets/DPinConfig.cpp
-        widgets/DPinConfig.hpp
-        widgets/DPinConfig.ui
-        widgets/DAnalogPinConfig.cpp
-        widgets/DAnalogPinConfig.hpp
-        widgets/DAnalogPinConfig.ui
-        widgets/DFlowLayout.cpp
-        widgets/DFlowLayout.hpp
-        fileNameTemplateValidator.cpp
-        fileNameTemplateValidator.hpp
-        views/FileNameTemplatingDialog.cpp
-        views/FileNameTemplatingDialog.hpp
-        views/FileNameTemplatingDialog.ui
-        views/ScanRateDialog.cpp
-        views/ScanRateDialog.hpp
-        views/ScanRateDialog.ui
-        views/LjOutputControlWindow.cpp
-        views/LjOutputControlWindow.hpp
-        views/LjOutputControlWindow.ui
-        widgets/WOutputPinRow.cpp
-        widgets/WOutputPinRow.hpp
-        widgets/WOutputPinRow.ui
-        utils.hpp
-        widgets/WClockConfig.cpp
-        widgets/WClockConfig.hpp
-        widgets/WClockConfig.ui
-        widgets/Int64SpinBox.cpp
-        widgets/Int64SpinBox.hpp
+add_executable(LJDumper
+        src/main.cpp
+        src/lj/ljManager.cpp
+        src/lj/ljManager.hpp
+        src/views/LjdMainWindow.cpp
+        src/views/LjdMainWindow.hpp
+        src/views/LjdMainWindow.ui
+        src/lj/utils.cpp
+        src/lj/utils.hpp
+        src/widgets/DPinConfig.cpp
+        src/widgets/DPinConfig.hpp
+        src/widgets/DPinConfig.ui
+        src/widgets/DAnalogPinConfig.cpp
+        src/widgets/DAnalogPinConfig.hpp
+        src/widgets/DAnalogPinConfig.ui
+        src/widgets/DFlowLayout.cpp
+        src/widgets/DFlowLayout.hpp
+        src/fileNameTemplateValidator.cpp
+        src/fileNameTemplateValidator.hpp
+        src/views/FileNameTemplatingDialog.cpp
+        src/views/FileNameTemplatingDialog.hpp
+        src/views/FileNameTemplatingDialog.ui
+        src/views/ScanRateDialog.cpp
+        src/views/ScanRateDialog.hpp
+        src/views/ScanRateDialog.ui
+        src/views/LjOutputControlWindow.cpp
+        src/views/LjOutputControlWindow.hpp
+        src/views/LjOutputControlWindow.ui
+        src/widgets/WOutputPinRow.cpp
+        src/widgets/WOutputPinRow.hpp
+        src/widgets/WOutputPinRow.ui
+        src/utils.hpp
+        src/widgets/WClockConfig.cpp
+        src/widgets/WClockConfig.hpp
+        src/widgets/WClockConfig.ui
+        src/widgets/Int64SpinBox.cpp
+        src/widgets/Int64SpinBox.hpp
 )
 target_include_directories(LJDumper PUBLIC ${CMAKE_BINARY_DIR}/LJDumper_autogen/include ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(LJDumper
@@ -64,3 +65,6 @@ target_link_libraries(LJDumper
         LabJackM::LabJackM
 )
 
+if(MSVC)
+    target_compile_options(LJDumper PRIVATE /Zc:preprocessor /wd4229)
+endif()
