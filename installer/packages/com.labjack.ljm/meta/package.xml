@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>LabJack LJM Driver</DisplayName>
+    <Description>Installs the LabJack LJM runtime required by LJDumper.</Description>
+    <Version>2025.02.12</Version>
+    <ReleaseDate>2026-05-05</ReleaseDate>
+    <Default>true</Default>
+    <ForcedInstallation>true</ForcedInstallation>
+    <Script>installscript.qs</Script>
+</Package>
